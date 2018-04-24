@@ -1,0 +1,83 @@
+<script type="text/javascript">
+    var oHtml = document.documentElement;
+    getSize();
+    window.onresize = function(){
+        getSize();
+    };
+    function getSize(){
+        var screenWidth = oHtml.clientWidth;
+        if (screenWidth < 320) {
+            oHtml.style.fontSize = '42.6667px';
+        } else if(screenWidth > 750){
+            oHtml.style.fontSize = '100px';
+        }else{
+            oHtml.style.fontSize = screenWidth/(750/100) + 'px';
+        }
+    }
+</script>
+
+100px = 1.0rem;
+上面这种情况会出现文字太小显示浏览器默认文本大小的情况，以下这种处理方式个人感觉更好一点
+
+# 关于px转rem
+
+## 实现功能
+根据UED给出的不同分辨率设计稿，将px转成rem
+
+## 原理
+
+1. 自定义html基数: font-size: 10px, 获取clientWidth 和 分辨率
+2. clientWidth < 320 || clientWidth > 750 自定义大小
+   其他： 根据公式：clientWidth ／ (分辨率 ／ (分辨率／html基数)）
+   
+## 说明
+font-size: 不推荐使用rem,会存在一定问题,可以使用@media方式解决；其他情况均可使用rem，如：width,height,line-height,margin,padding等
+
+## 代码
+
+### style.css
+
+html {
+    /* 
+        10 / 16 * 100% = 62.5%
+    */
+    font-size: 62.5%;  // font-size: 10px;
+}
+
+### index.html
+
+        (function() {
+            var oHtml = document.documentElement;
+            getSize();
+            // 当页面没有刷新单屏幕尺寸发生变化时，实时自适应。例：竖屏 转 横屏
+            window.onresize = function () {
+                getSize();
+            }
+            function getSize() {
+                var screenWidth = oHtml.clientWidth;
+                
+                // screenWidth < 320 || screenWidth > 750 时
+                /* 方法一： 通过媒体查询 (不是一直都需要的，处理特殊情况时需要)
+                    html{font-size: 10px}
+                    @media screen and (max-width:320px) {html{font-size:10px}} // 设置文本font-size时，要具体到class
+                    @media screen and (min-width:321px) and (max-width:375px){html{font-size:11px}}
+                    @media screen and (min-width:376px) and (max-width:414px){html{font-size:12px}}
+                    @media screen and (min-width:415px) and (max-width:639px){html{font-size:15px}}
+                    @media screen and (min-width:640px) and (max-width:719px){html{font-size:20px}}
+                    @media screen and (min-width:720px) and (max-width:749px){html{font-size:22.5px}}
+                    @media screen and (min-width:750px) and (max-width:799px){html{font-size:23.5px}}
+                    @media screen and (min-width:800px){html{font-size:25px}}
+                *／
+                // 方法二：给出不同的值
+                if (screenWidth < 320) {
+                    oHtml.style.fontSize = '10px';
+                } else if (screenWidth > 750) {
+                    oHtml.style.fontSize = '20px';
+                } else {
+                    // 由于设计稿分辨率的不同，这里screenWidth 所除的值也会随之修改，
+                    // 例：当设计稿给出750像素时，oHtml.style.fontSize = screenWidth / 75 + 'px';
+                    // 当设计稿给出375像素时
+                    oHtml.style.fontSize = screenWidth / 37.5 + 'px';
+                };
+            }
+        }())
